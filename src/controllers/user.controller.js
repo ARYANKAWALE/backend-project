@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // };
 
     if (
-        [fullname, email, username, password].some((field) => field?.trim() === "")
+        [fullname, email, username, password].some((field) => field?.trim() === ("" || undefined))
     ) {
         throw new ApiError(400, "All fields are required")
     }
@@ -59,11 +59,11 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existedUser) {
         // Clean up uploaded files
         if (req.files?.avatar?.[0]?.path) fs.unlinkSync(req.files.avatar[0].path)
-        if (req.files?.coverImage?.[0]?.path) fs.unlinkSync(req.files.coverImage[0].path)
+        if (req.files?.coverImage?.[0]?.path) fs.unlinkSync(req.files.coverImage?.[0].path)
         throw new ApiError(409, "User with email or username already exists")
     }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
     // const coverImageLocalPath = req.files?.coverImage[0]?.path;
     //  console.log("Avatar Path:", avatarLocalPath,coverImageLocalPath)
 
