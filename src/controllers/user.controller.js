@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // };
 
     if (
-        [fullname, email, username, password].some((field) => field?.trim() === ("" || undefined))
+        [fullname, email, username, password].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required")
     }
@@ -182,5 +182,7 @@ const logOutUser = asyncHandler(async (req, res) => {
         .clearCookie("refreshToken", options)
         .json(new ApiResponse(200, {}, "User logged out"))
 })
+
+
 
 export { registerUser, loginUser, logOutUser }
