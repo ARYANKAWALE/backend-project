@@ -255,7 +255,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fileds are required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -274,6 +274,11 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is missing")
+    }
+
+    const oldAvatar = await User.findById(req.user?._id)
+    if(oldAvatar.avatar){
+        await deleteOnCloudinary(oldAvatar.avatar)
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
@@ -298,6 +303,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverLocalPath = req.file?.path
     if (!coverLocalPath) {
         throw new ApiError(400, "Cover image file is missing")
+    }
+
+    const oldCoverImage = await User.findById(req.user?._id)
+    if(oldCoverImage.coverImage){
+        await deleteOnCloudinary(oldCoverImage.coverImage)
     }
 
     const coverImage = await uploadOnCloudinary(coverLocalPath)
