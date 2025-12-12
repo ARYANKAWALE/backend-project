@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import fs from "fs"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
@@ -165,8 +166,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const logOutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
-        $set: {
-            refreshToken: undefined
+        $unset: {
+            refreshToken: 1
         }
     },
         {
@@ -247,6 +248,11 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, {}, "Password changed successfully"))
 
+})
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res.status(200).json(new ApiResponse(200, req.user, "User fetched successfully"
+    ))
 })
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -406,32 +412,32 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         },
         {
             $lookup: {
-                from:"videos",
-                localField:"watchHistory",
-                foreignField:"_id",
-                as:"watchHistory",
-                pipeline:[
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
                     {
-                        $lookup:{
-                            from:"users",
-                            localField:"owner",
-                            foreignField:"_id",
-                            as:"owner",
-                            pipeline:[
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
                                 {
-                                    $project:{
-                                        fullname:1,
-                                        username:1,
-                                        avatar:1
+                                    $project: {
+                                        fullname: 1,
+                                        username: 1,
+                                        avatar: 1
                                     }
                                 }
                             ]
                         }
                     },
                     {
-                        $addFields:{
-                            owner:{
-                                $first:"$owner"
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
                             }
                         }
                     }
@@ -439,10 +445,10 @@ const getWatchHistory = asyncHandler(async (req, res) => {
             }
         }
     ])
-    
+
     return res
-    .status(200)
-    .json(new ApiResponse(200,user[0].watchHistory,"Watch history fetched"))
+        .status(200)
+        .json(new ApiResponse(200, user[0].watchHistory, "Watch history fetched"))
 })
 
 
@@ -456,5 +462,6 @@ export {
     updateUserAvatar,
     updateUserCoverImage,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    getCurrentUser
 }
